@@ -4,35 +4,49 @@ This is a small logging module that helps a more organized message logging. You 
 
 ## Usage
 
+### Install
+
+    npm install moonstar-x/logger
+
 ### Creating an instance
 
-    const { Logger } = require('logger');
-    const logger = new Logger({
-      colors: true,
-      timestamps: true
-    });
+``` js
+const { Logger } = require('logger');
+const logger = new Logger({
+  colors: true,
+  timestamps: true
+});
+```
 
 You can enable and disable colors and timestamps if you don't wish to use them.
 
 ### Logging Messages
 
-You can log multiple types of languages:
+You can log multiple types of messages:
 
 #### INFO
 
-    logger.info("message to log");
+``` js
+logger.info("message to log");
+```
 
 #### WARN
 
-    logger.warn("message to log");
+``` js
+logger.warn("message to log");
+```
 
 #### ERROR
 
-    logger.error("message to log")
+``` js
+logger.error("message to log");
+```
 
 #### DEBUG
 
-    logger.debug("message to log");
+``` js
+logger.debug("message to log");
+```
 
 ## Author
 
