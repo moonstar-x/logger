@@ -1,8 +1,11 @@
 class Logger {
 
-  constructor( options = { } ) {
+  constructor(options = {}) {
     // Set default options.
-    const defaults = { colors: true, timestamps: true };
+    const defaults = {
+      colors: true,
+      timestamps: true
+    };
     for (let key in defaults) {
       if (!(key in options)) {
         options[key] = defaults[key];
@@ -10,7 +13,7 @@ class Logger {
     }
 
     // Check if options are valid booleans.
-    if (typeof(options.colors) != "boolean" || typeof(options.timestamps) != "boolean") {
+    if (typeof (options.colors) != "boolean" || typeof (options.timestamps) != "boolean") {
       throw new Error("TypeError : Constructor options are not of type Bool!");
     }
 
@@ -19,19 +22,19 @@ class Logger {
   }
 
   info(msg) {
-    this._logMessage(msg, "INFO");
+    this._logstdout(msg, "INFO");
   }
 
   warn(msg) {
-    this._logMessage(msg, "WARN");
+    this._logstderr(msg, "WARN");
   }
 
   error(msg) {
-    this._logMessage(msg, "ERROR");
+    this._logstderr(msg, "ERROR");
   }
 
   debug(msg) {
-    this._logMessage(msg, "DEBUG");
+    this._logstdout(msg, "DEBUG");
   }
 
   _color(fg, bg = null) {
@@ -47,7 +50,7 @@ class Logger {
         "CYAN": "\x1b[36m",
         "WHITE": "\x1b[37m"
       }
-  
+
       const backgrounds = {
         "BLACK": "\x1b[40m",
         "RED": "\x1b[41m",
@@ -58,13 +61,13 @@ class Logger {
         "CYAN": "\x1b[46m",
         "WHITE": "\x1b[47m"
       }
-  
+
       const reset = "\x1b[0m";
-  
+
       if (!colors.hasOwnProperty(fg)) {
         throw new Error("Color is not defined!");
       }
-  
+
       if (bg) {
         if (!backgrounds.hasOwnProperty(bg)) {
           throw new Error("Background is not defined!");
@@ -79,13 +82,12 @@ class Logger {
     }
   }
 
-  _logMessage(msg, type) {
+  // Log to stdout.
+  _logstdout(msg, type) {
     // Define message types.
     const types = {
-      "INFO" : "CYAN",
-      "WARN" : "YELLOW",
-      "ERROR" : "RED",
-      "DEBUG" : "GREEN"
+      "INFO": "CYAN",
+      "DEBUG": "GREEN"
     }
 
     if (!types.hasOwnProperty(type)) {
@@ -94,19 +96,66 @@ class Logger {
 
     // Print the message according to the set options in the class construction.
     switch ([this.colored, this.timestamps].join(' ')) {
-      case "true true" :
+      case "true true":
         console.log(this._color(types[type]), `(${new Date().toLocaleTimeString()}) - [${type}] - ${msg}`);
         break;
-      case "true false" :
+      case "true false":
         console.log(this._color(types[type]), `[${type}] - ${msg}`);
         break;
-      case "false true" :
+      case "false true":
         console.log(`(${new Date().toLocaleTimeString()}) - [${type}] - ${msg}`);
         break;
-      case "false false" :
+      case "false false":
         console.log(`[${type}] - ${msg}`);
         break;
-      default :
+      default:
+        throw new Error("Unexpected Case");
+    }
+  }
+
+  // Log to stderr.
+  _logstderr(msg, type) {
+    // Define message types.
+    const types = {
+      "WARN": "YELLOW",
+      "ERROR": "RED"
+    }
+
+    if (!types.hasOwnProperty(type)) {
+      throw new Error("Unknown message type!");
+    }
+
+    // Print the message according to the set options in the class construction.
+    switch ([this.colored, this.timestamps].join(' ')) {
+      case "true true":
+        if (type == "ERROR") {
+          console.error(this._color(types[type]), `(${new Date().toLocaleTimeString()}) - [${type}] - ${msg}`);
+        } else {
+          console.warn(this._color(types[type]), `(${new Date().toLocaleTimeString()}) - [${type}] - ${msg}`);
+        }
+        break;
+      case "true false":
+        if (type == "ERROR") {
+          console.error(this._color(types[type]), `[${type}] - ${msg}`);
+        } else {
+          console.warn(this._color(types[type]), `[${type}] - ${msg}`);
+        }
+        break;
+      case "false true":
+        if (type == "ERROR") {
+          console.error(`(${new Date().toLocaleTimeString()}) - [${type}] - ${msg}`);
+        } else {
+          console.warn(`(${new Date().toLocaleTimeString()}) - [${type}] - ${msg}`);
+        }
+        break;
+      case "false false":
+        if (type == "ERROR") {
+          console.error(`[${type}] - ${msg}`);
+        } else {
+          console.warn(`[${type}] - ${msg}`);
+        }
+        break;
+      default:
         throw new Error("Unexpected Case");
     }
   }
