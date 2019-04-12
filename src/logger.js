@@ -21,20 +21,24 @@ class Logger {
     this.timestamps = options.timestamps;
   }
 
-  info(msg) {
-    this._logstdout(msg, "INFO");
+  info(/**/) {
+    const args = Array.prototype.slice.call(arguments).join(' ');
+    this._logstdout(args, "INFO");
   }
 
-  warn(msg) {
-    this._logstderr(msg, "WARN");
+  warn(/**/) {
+    const args = Array.prototype.slice.call(arguments).join(' ');
+    this._logstderr(args, "WARN");
   }
 
-  error(msg) {
-    this._logstderr(msg, "ERROR");
+  error(/**/) {
+    const args = Array.prototype.slice.call(arguments).join(' ');
+    this._logstderr(args, "ERROR");
   }
 
-  debug(msg) {
-    this._logstdout(msg, "DEBUG");
+  debug(/**/) {
+    const args = Array.prototype.slice.call(arguments).join(' ');
+    this._logstdout(args, "DEBUG");
   }
 
   _color(fg, bg = null) {
