@@ -1,5 +1,15 @@
 class Logger {
 
+  /**
+   * Creates an instance of Logger.
+   * 
+   * @param {*} [options={}] 
+   * Options object parameter is optional. Its properties are:
+   * <Bool> colors: Defines whether messages should be colored or not.
+   * <Bool> timestamps: Defines whether timestamps should be logged or not.
+   * 
+   * @memberof Logger
+   */
   constructor(options = {}) {
     // Set default options.
     const defaults = {
@@ -21,21 +31,53 @@ class Logger {
     this.timestamps = options.timestamps;
   }
 
+  /**
+   * Log INFO messages to console.
+   * Prints to stdout.
+   *
+   * @memberof Logger
+   * @param {...*} messages The stringable messages to log in console.
+   * @returns {void}
+   */
   info(/**/) {
     const args = Array.prototype.slice.call(arguments).join(' ');
     this._logstdout(args, "INFO");
   }
 
+  /**
+   * Log WARN messages to console.
+   * Prints to stderr.
+   *
+   * @memberof Logger
+   * @param {...*} messages The stringable messages to log in console.
+   * @returns {void}
+   */
   warn(/**/) {
     const args = Array.prototype.slice.call(arguments).join(' ');
     this._logstderr(args, "WARN");
   }
 
+  /**
+   * Log ERROR messages to console.
+   * Prints to stderr.
+   *
+   * @memberof Logger
+   * @param {...*} messages The stringable messages to log in console.
+   * @returns {void}
+   */
   error(/**/) {
     const args = Array.prototype.slice.call(arguments).join(' ');
     this._logstderr(args, "ERROR");
   }
 
+  /**
+   * Log DEBUG messages to console.
+   * Prints to stdout.
+   *
+   * @memberof Logger
+   * @param {...*} messages The stringable messages to log in console.
+   * @returns {void}
+   */
   debug(/**/) {
     const args = Array.prototype.slice.call(arguments).join(' ');
     this._logstdout(args, "DEBUG");
