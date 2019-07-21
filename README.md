@@ -14,11 +14,12 @@ This is a small logging module that helps a more organized message logging. You 
 const { Logger } = require('logger');
 const logger = new Logger({
   colors: true,
-  timestamps: true
+  timestamps: true,
+  trace: true
 });
 ```
 
-You can enable and disable colors and timestamps if you don't wish to use them.
+If you omit the options object in the object constructor, the Logger will be initialized with these settings as default. You can enable and disable colors, timestamps and error stack trace if you don't wish to use them.
 
 ### Logging Messages
 
@@ -46,6 +47,14 @@ logger.error("message to log");
 
 ``` js
 logger.debug("message to log");
+```
+
+### Clear Console
+
+You can clear the console with:
+
+``` js
+logger.clear();
 ```
 
 ## Author

@@ -1,3 +1,5 @@
+const { msgTypes, reset } = require('./constants'); 
+
 class Logger {
 
   /**
@@ -11,10 +13,10 @@ class Logger {
    * @memberof Logger
    */
   constructor(options = {}) {
-    // Set default options.
     const defaults = {
       colors: true,
-      timestamps: true
+      timestamps: true,
+      trace: true
     };
     for (let key in defaults) {
       if (!(key in options)) {
@@ -22,13 +24,11 @@ class Logger {
       }
     }
 
-    // Check if options are valid booleans.
-    if (typeof (options.colors) != "boolean" || typeof (options.timestamps) != "boolean") {
-      throw new Error("TypeError : Constructor options are not of type Bool!");
-    }
+    this._validateOptions(options);
 
     this.colored = options.colors;
     this.timestamps = options.timestamps;
+    this.trace = options.trace;
   }
 
   /**
@@ -41,7 +41,7 @@ class Logger {
    */
   info(/**/) {
     const args = Array.prototype.slice.call(arguments).join(' ');
-    this._logstdout(args, "INFO");
+    this._logstdout(args, msgTypes.info);
   }
 
   /**
@@ -54,7 +54,7 @@ class Logger {
    */
   warn(/**/) {
     const args = Array.prototype.slice.call(arguments).join(' ');
-    this._logstderr(args, "WARN");
+    this._logstderr(args, msgTypes.warn);
   }
 
   /**
@@ -67,7 +67,12 @@ class Logger {
    */
   error(/**/) {
     const args = Array.prototype.slice.call(arguments).join(' ');
-    this._logstderr(args, "ERROR");
+    if (this.trace) {
+      const trace = new Error().stack.split('\n').slice(2).join('\n');
+      this._logstderr(`${args}\n${trace}`, msgTypes.error)
+    } else {
+      this._logstderr(args, msgTypes.error);
+    }
   }
 
   /**
@@ -80,134 +85,99 @@ class Logger {
    */
   debug(/**/) {
     const args = Array.prototype.slice.call(arguments).join(' ');
-    this._logstdout(args, "DEBUG");
+    this._logstdout(args, msgTypes.debug);
   }
 
-  _color(fg, bg = null) {
-    if (this.colored) {
-      // Define color ANSI codes.
-      const colors = {
-        "BLACK": "\x1b[30m",
-        "RED": "\x1b[31m",
-        "GREEN": "\x1b[32m",
-        "YELLOW": "\x1b[33m",
-        "BLUE": "\x1b[34m",
-        "MAGENTA": "\x1b[35m",
-        "CYAN": "\x1b[36m",
-        "WHITE": "\x1b[37m"
-      }
+  /**
+   * Clears console output.
+   *
+   * @memberof Logger
+   * @returns {void}
+   */
+  clear() {
+    console.clear();
+  }
 
-      const backgrounds = {
-        "BLACK": "\x1b[40m",
-        "RED": "\x1b[41m",
-        "GREEN": "\x1b[42m",
-        "YELLOW": "\x1b[43m",
-        "BLUE": "\x1b[44m",
-        "MAGENTA": "\x1b[45m",
-        "CYAN": "\x1b[46m",
-        "WHITE": "\x1b[47m"
-      }
+  _validateOptions(options) {
+    const { colors, timestamps, trace } = options;
 
-      const reset = "\x1b[0m";
-
-      if (!colors.hasOwnProperty(fg)) {
-        throw new Error("Color is not defined!");
-      }
-
-      if (bg) {
-        if (!backgrounds.hasOwnProperty(bg)) {
-          throw new Error("Background is not defined!");
-        }
-        return `${colors[fg]}${backgrounds[bg]}%s${reset}`;
-      } else {
-        return `${colors[fg]}%s${reset}`;
-      }
-
-    } else {
-      return "";
+    if (typeof (colors) != 'boolean' ||
+      typeof (timestamps) != 'boolean' ||
+      typeof (trace) != 'boolean'
+    ) {
+      throw new TypeError('Constructor options are not valid!');
     }
   }
 
-  // Log to stdout.
-  _logstdout(msg, type) {
-    // Define message types.
-    const types = {
-      "INFO": "CYAN",
-      "DEBUG": "GREEN"
-    }
+  _logstdout(msg, msgType) {
+    const { type, color } = msgType;
 
-    if (!types.hasOwnProperty(type)) {
-      throw new Error("Unknown message type!");
-    }
-
-    // Print the message according to the set options in the class construction.
     switch ([this.colored, this.timestamps].join(' ')) {
-      case "true true":
-        console.log(this._color(types[type]), `(${new Date().toLocaleTimeString()}) - [${type}] - ${msg}`);
+      case 'true true':
+        console.log(this._applyColor(color), `(${new Date().toLocaleTimeString()}) - [${type}] - ${msg}`);
         break;
-      case "true false":
-        console.log(this._color(types[type]), `[${type}] - ${msg}`);
+      case 'true false':
+        console.log(this._applyColor(color), `[${type}] - ${msg}`);
         break;
-      case "false true":
+      case 'false true':
         console.log(`(${new Date().toLocaleTimeString()}) - [${type}] - ${msg}`);
         break;
-      case "false false":
+      case 'false false':
         console.log(`[${type}] - ${msg}`);
         break;
       default:
-        throw new Error("Unexpected Case");
+        throw new Error('Unexpected Case!');
     }
   }
 
-  // Log to stderr.
-  _logstderr(msg, type) {
-    // Define message types.
-    const types = {
-      "WARN": "YELLOW",
-      "ERROR": "RED"
-    }
 
-    if (!types.hasOwnProperty(type)) {
-      throw new Error("Unknown message type!");
-    }
+  _logstderr(msg, msgType) {
+    const { type, color } = msgType;
 
-    // Print the message according to the set options in the class construction.
     switch ([this.colored, this.timestamps].join(' ')) {
-      case "true true":
-        if (type == "ERROR") {
-          console.error(this._color(types[type]), `(${new Date().toLocaleTimeString()}) - [${type}] - ${msg}`);
+      case 'true true':
+        if (type == 'ERROR') {
+          console.error(this._applyColor(color), `(${new Date().toLocaleTimeString()}) - [${type}] - ${msg}`);
         } else {
-          console.warn(this._color(types[type]), `(${new Date().toLocaleTimeString()}) - [${type}] - ${msg}`);
+          console.warn(this._applyColor(color), `(${new Date().toLocaleTimeString()}) - [${type}] - ${msg}`);
         }
         break;
-      case "true false":
-        if (type == "ERROR") {
-          console.error(this._color(types[type]), `[${type}] - ${msg}`);
+      case 'true false':
+        if (type == 'ERROR') {
+          console.error(this._applyColor(color), `[${type}] - ${msg}`);
         } else {
-          console.warn(this._color(types[type]), `[${type}] - ${msg}`);
+          console.warn(this._applyColor(color), `[${type}] - ${msg}`);
         }
         break;
-      case "false true":
-        if (type == "ERROR") {
+      case 'false true':
+        if (type == 'ERROR') {
           console.error(`(${new Date().toLocaleTimeString()}) - [${type}] - ${msg}`);
         } else {
           console.warn(`(${new Date().toLocaleTimeString()}) - [${type}] - ${msg}`);
         }
         break;
-      case "false false":
-        if (type == "ERROR") {
+      case 'false false':
+        if (type == 'ERROR') {
           console.error(`[${type}] - ${msg}`);
         } else {
           console.warn(`[${type}] - ${msg}`);
         }
         break;
       default:
-        throw new Error("Unexpected Case");
+        throw new Error('Unexpected Case!');
     }
+  }
+
+  _applyColor(color) {
+    if (this.colored) {
+      return `${color}%s${reset}`;
+    }
+
+    return '';
   }
 
 }
 
 module.exports = {
-  Logger: Logger
+  Logger
 }
