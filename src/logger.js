@@ -66,13 +66,9 @@ class Logger {
    * @returns {void}
    */
   error(/**/) {
-    const args = Array.prototype.slice.call(arguments).join(' ');
-    if (this.trace) {
-      const trace = new Error().stack;
-      this._logstderr(`${args}\n${trace}`, msgTypes.error)
-    } else {
-      this._logstderr(args, msgTypes.error);
-    }
+    const args = Array.prototype.slice.call(arguments);
+    const parsedArgs = this.trace ? args.map(arg => arg.stack || arg).join(' ') : args.join(' ');
+    this._logstderr(parsedArgs, msgTypes.error)
   }
 
   /**
