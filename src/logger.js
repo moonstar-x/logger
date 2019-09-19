@@ -68,7 +68,7 @@ class Logger {
   error(/**/) {
     const args = Array.prototype.slice.call(arguments).join(' ');
     if (this.trace) {
-      const trace = new Error().stack.split('\n').slice(2).join('\n');
+      const trace = new Error().stack;
       this._logstderr(`${args}\n${trace}`, msgTypes.error)
     } else {
       this._logstderr(args, msgTypes.error);
